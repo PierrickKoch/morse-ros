@@ -5,14 +5,15 @@
 
 using namespace std;
 
-geometry_msgs::Twist *
-wander(const sensor_msgs::LaserScan::ConstPtr& msg)
+ros::Publisher topic;
+
+void wander(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     assert(msg->ranges.size() >= 30);
     int angle;
     int halt = 0;
     int mid = msg->ranges.size() / 2;
-    geometry_msgs::Twist * cmd = new geometry_msgs::Twist();
+    geometry_msgs::Twist cmd;
     // halt if an object is less than 2m in a 30deg angle
     for (angle = mid - 15; angle < mid + 15; angle++) {
         if (msg->ranges[angle] < 2) {
@@ -26,24 +27,15 @@ wander(const sensor_msgs::LaserScan::ConstPtr& msg)
         midR = std::accumulate(msg->ranges.begin()+mid, msg->ranges.end(), 0);
         // we go to the highest-range side scanned
         if (midL < midR) {
-            cmd->angular.z = -1.0;
+            cmd.angular.z = -1.0;
         } else {
-            cmd->angular.z = +1.0;
+            cmd.angular.z = +1.0;
         }
     } else {
-        cmd->linear.x = 1.0;
+        cmd.linear.x = 1.0;
     }
 
-    return cmd;
-}
-
-ros::Publisher topic;
-
-void handle_lidar(const sensor_msgs::LaserScan::ConstPtr& msg)
-{
-    geometry_msgs::Twist * cmd = wander(msg);
-    topic.publish(*cmd);
-    delete(cmd);
+    topic.publish(cmd);
 }
 
 int main(int argc, char **argv)
@@ -54,7 +46,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
     topic = n.advertise<geometry_msgs::Twist>("cmd", 1000);
-    ros::Subscriber sub = n.subscribe("laser", 1000, handle_lidar);
+    ros::Subscriber sub = n.subscribe("laser", 1000, wander);
     ros::spin();
     return 0;
 }

@@ -1,3 +1,9 @@
+# Orocos
+bin/
+build/
+.tb_history
+orocos.log
+
 # Compiled Object files
 *.slo
 *.lo

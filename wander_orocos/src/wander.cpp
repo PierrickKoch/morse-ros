@@ -8,14 +8,36 @@
 using namespace std;
 using namespace RTT;
 
-geometry_msgs::Twist *
-wander(const sensor_msgs::LaserScan * msg)
+class Wander : public RTT::TaskContext {
+public:
+    Wander(const std::string& name):
+        TaskContext(name),
+        inport("laser_in"),
+        outport("twist_out")
+    {
+        ports()->addPort(inport);
+        ports()->addPort(outport);
+    }
+    ~Wander() {}
+private:
+    InputPort<sensor_msgs::LaserScan> inport;
+    OutputPort<geometry_msgs::Twist> outport;
+    void wander(const sensor_msgs::LaserScan::ConstPtr& msg);
+    void updateHook() {
+        sensor_msgs::LaserScan::Ptr msg(new sensor_msgs::LaserScan());
+        if (NewData == inport.read(*msg)) {
+            wander(msg);
+        }
+    }
+};
+
+void Wander::wander(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     assert(msg->ranges.size() >= 30);
     int angle;
     int halt = 0;
     int mid = msg->ranges.size() / 2;
-    geometry_msgs::Twist * cmd = new geometry_msgs::Twist();
+    geometry_msgs::Twist cmd;
     // halt if an object is less than 2m in a 30deg angle
     for (angle = mid - 15; angle < mid + 15; angle++) {
         if (msg->ranges[angle] < 2) {
@@ -29,41 +51,15 @@ wander(const sensor_msgs::LaserScan * msg)
         midR = std::accumulate(msg->ranges.begin()+mid, msg->ranges.end(), 0);
         // we go to the highest-range side scanned
         if (midL < midR) {
-            cmd->angular.z = -1.0;
+            cmd.angular.z = -1.0;
         } else {
-            cmd->angular.z = +1.0;
+            cmd.angular.z = +1.0;
         }
     } else {
-        cmd->linear.x = 1.0;
+        cmd.linear.x = 1.0;
     }
 
-    return cmd;
+    outport.write(cmd);
 }
-
-class Wander : public RTT::TaskContext {
-private:    
-    InputPort<sensor_msgs::LaserScan> inport;
-    OutputPort<geometry_msgs::Twist> outport;
-
-public:
-    Wander(const std::string& name):
-        TaskContext(name),
-        inport("laser_in"),
-        outport("twist_out")
-    {
-        ports()->addPort(inport);
-        ports()->addPort(outport);
-    }
-    ~Wander() {}
-private:
-    void updateHook() {
-        sensor_msgs::LaserScan msg;
-        if (NewData == inport.read(msg)) {
-            geometry_msgs::Twist * cmd = wander(&msg);
-            outport.write(*cmd);
-            delete(cmd);
-        }
-    }
-};
 
 ORO_CREATE_COMPONENT(Wander)

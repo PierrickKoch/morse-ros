@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 
 topic = None
 
-def handle_lidar(message):
+def wander(message):
     assert(len(message.ranges) >= 30)
     mid = len(message.ranges) // 2
     cmd = Twist()
@@ -32,5 +32,5 @@ if __name__ == '__main__':
     rospy.loginfo("wander rospy initialized")
     topic = rospy.Publisher('cmd', Twist)
     # see: ros.org/doc/api/sensor_msgs/html/msg/LaserScan.html
-    rospy.Subscriber('laser', LaserScan, handle_lidar)
+    rospy.Subscriber('laser', LaserScan, wander)
     rospy.spin() # block while ROS-node is up, Ctrl+C to stop

@@ -25,7 +25,7 @@ sick.frequency(5)
 
 # Auto-configure all robot's components for ROS
 robot.add_default_interface('ros')
-robot.rotate(z = 2.4)
+robot.rotate(z = 2.1)
 robot.translate(x = 2)
 
 # Select the environement, 'lab2.blend' is a local file in the current directory
