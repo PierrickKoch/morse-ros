@@ -1,0 +1,4 @@
+- git:
+    local-name: morse-ros
+    uri: git://github.com/pierriko/morse-ros.git
+    version: master
