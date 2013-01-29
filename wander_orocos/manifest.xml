@@ -1,0 +1,17 @@
+<package>
+  <description brief="wander">
+
+     wander
+
+  </description>
+  <author>Pierrick</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/</url>
+  <depend package="rtt"/>
+  <depend package="rtt_geometry_msgs"/>
+  <depend package="rtt_sensor_msgs"/>
+
+</package>
+
+

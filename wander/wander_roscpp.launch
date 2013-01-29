@@ -1,0 +1,4 @@
+<launch>
+  <node name="wander" pkg="wander" type="wander" respawn="false" output="screen"/>
+  <node pkg="tf" type="static_transform_publisher" name="proteus_broadcaster" args="0 0 0 0 0 0 base_link base_laser_link 100" />
+</launch>

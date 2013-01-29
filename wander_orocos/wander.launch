@@ -1,0 +1,3 @@
+<launch>
+<node name="wander" pkg="ocl" type="deployer-gnulinux" args="-s $(find wander)/wander.xml -linfo --" output="screen"/>
+</launch>

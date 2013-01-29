@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "cpf.dtd">
+<properties>
+<simple name="Import" type="string"><value>wander_orocos</value></simple>
+
+<struct name="ROSConTwistOut" type="ConnPolicy">
+  <simple name="type" type="short"><value>0</value></simple><!-- type of connection: 0 means Data -->
+  <simple name="size" type="short"><value>1</value></simple><!-- buffer size -->
+  <simple name="transport" type="short"><value>3</value></simple><!--3 means ROS-->
+  <simple name="name_id" type="string"><value>/robot/motion</value></simple><!-- topic name -->
+</struct>
+<struct name="ROSConLaserIn" type="ConnPolicy">
+  <simple name="type" type="short"><value>0</value></simple><!-- type of connection: 0 means Data -->
+  <simple name="size" type="short"><value>1</value></simple><!-- buffer size -->
+  <simple name="transport" type="short"><value>3</value></simple><!--3 means ROS-->
+  <simple name="name_id" type="string"><value>/robot/sick</value></simple><!-- topic name -->
+</struct>
+
+<struct name="Wander" type="Wander">
+  <struct name="Activity" type="PeriodicActivity">
+    <simple name="Period" type="double"><value>1</value></simple>
+    <simple name="Priority" type="short"><value>0</value></simple>
+    <simple name="Scheduler" type="string"><value>ORO_SCHED_RT</value></simple>
+  </struct>
+  <simple name="AutoConf" type="boolean"><value>1</value></simple>
+  <simple name="AutoStart" type="boolean"><value>1</value></simple>
+  <struct name="Ports" type="PropertyBag">
+    <simple name="twist_out" type="string"><value> ROSConTwistOut </value></simple>
+    <simple name="laser_in" type="string"><value> ROSConLaserIn </value></simple>
+  </struct>
+</struct>
+
+</properties>

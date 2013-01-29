@@ -1,0 +1,18 @@
+<package>
+  <description brief="wander">
+
+     wander
+
+  </description>
+  <author>pierriko</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/wander</url>
+
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
