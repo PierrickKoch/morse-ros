@@ -1,0 +1,20 @@
+<package>
+  <description brief="octomap_morse">
+
+     octomap_morse
+
+  </description>
+  <author>pierriko</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/octomap_morse</url>
+
+  <depend package="rospy"/>
+  <depend package="nav_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="octomap_server"/>
+
+</package>
+
+
