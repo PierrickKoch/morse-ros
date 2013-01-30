@@ -9,6 +9,7 @@ roslib.load_manifest('rospy')
 roslib.load_manifest('nav_msgs')
 roslib.load_manifest('geometry_msgs')
 import rospy
+from nav_msgs.msg import Odometry
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Twist
 import wx
@@ -182,11 +183,15 @@ class KeyEventFrame(wx.Frame):
         self.publisher.cont = False
         self.Close()
 
+def dump_odom(message):
+    print(message.pose.pose.orientation)
+
 def main(argv):
     app = wx.App()
     KeyEventFrame()
     print(__doc__)
     app.MainLoop()
+    rospy.Subscriber("/robot/odometry", Odometry, dump_odom)
     rospy.signal_shutdown("MainLoop")
     return 0
 

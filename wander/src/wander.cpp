@@ -26,7 +26,7 @@ void wander(const sensor_msgs::LaserScan::ConstPtr& msg)
         midL = std::accumulate(msg->ranges.begin(), msg->ranges.end()-mid, 0);
         midR = std::accumulate(msg->ranges.begin()+mid, msg->ranges.end(), 0);
         // we go to the highest-range side scanned
-        if (midL < midR) {
+        if (midL > midR) {
             cmd.angular.z = -1.0;
         } else {
             cmd.angular.z = +1.0;

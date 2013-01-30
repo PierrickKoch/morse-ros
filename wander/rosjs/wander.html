@@ -34,7 +34,7 @@ function wander(ranges) {
   }
   if (halt) {
     // we go to the highest-range side scanned
-    if (ranges.sum(0, mid) < ranges.sum(mid)) {
+    if (ranges.sum(0, mid) > ranges.sum(mid)) {
       cmd.angular.z = -1;
     } else {
       cmd.angular.z = +1;

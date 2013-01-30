@@ -17,7 +17,7 @@ def wander(message):
             break
     if halt:
         # we go to the highest-range side scanned
-        if sum(message.ranges[:mid]) < sum(message.ranges[mid:]):
+        if sum(message.ranges[:mid]) > sum(message.ranges[mid:]):
             cmd.angular.z = -1
         else:
             cmd.angular.z = +1
