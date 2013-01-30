@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+<title>wander rosjs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="eventemitter2.js"></script>
+<script type="text/javascript" src="ros.js"></script>
+<script type="text/javascript">
+(function () { // [onload]
+
+// Add the sum method to Array
+Array.prototype.sum = function (begin, end) {
+  var end = typeof end !== 'undefined' ? end : this.length,
+      inc = typeof begin !== 'undefined' ? begin : 0, sum = 0;
+  for (; inc < end; sum += this[inc++]) {}
+  return sum;
+}
+
+function logdebug(msg) {
+  document.getElementById('debug').innerHTML += msg + '\n';
+}
+
+function wander(ranges) {
+  var mid = Math.floor(ranges.length / 2);
+  var cmd = {linear:  {x:0, y:0, z:0},
+             angular: {x:0, y:0, z:0}};
+  // halt if an object is less than 2m in a 30deg angle
+  var halt = false;
+  for (i = mid-15; i < mid+15; i++) {
+    if (ranges[i] < 2) {
+      halt = true;
+      break;
+    }
+  }
+  if (halt) {
+    // we go to the highest-range side scanned
+    if (ranges.sum(0, mid) < ranges.sum(mid)) {
+      cmd.angular.z = -1;
+    } else {
+      cmd.angular.z = +1;
+    }
+  } else {
+    cmd.linear.x = 1;
+  }
+  return cmd;
+}
+
+/* rosrun mjpeg_server mjpeg_server */
+function updateImage() {
+  var image = document.getElementById('image');
+  image.onload = function() {
+    window.setTimeout(updateImage, 500);
+  };
+  image.src = 'http://localhost:8080/stream?topic=/robot/camera/image&' +
+              Number(new Date);
+}
+
+// Connecting to ROS
+// -----------------
+var ros = new ROS();
+
+// If there is an error on the backend, an 'error' emit will be emitted.
+ros.on('error', function(error) {
+  logdebug("error: "+error);
+});
+
+// Create a connection to the rosbridge WebSocket server.
+ros.connect('ws://localhost:9090');
+
+// Publishing a Topic
+// ------------------
+
+// First, we create a Topic object with details of the topic's node, name, and
+// message type.
+var robot_motion = new ros.Topic({
+  name        : '/robot/motion'
+, messageType : 'geometry_msgs/Twist'
+});
+
+function send_twist(message) {
+  robot_motion.publish(message);
+}
+
+// Subscribing to a Topic
+// ----------------------
+
+// Like when publishing a topic, we first create a Topic object with details of
+// the topic's node, name, and message type. Note that we can call publish or
+// subscribe on the same topic object.
+var robot_scan = new ros.Topic({
+  name        : '/robot/sick',
+  messageType : 'sensor_msgs/LaserScan'
+});
+
+var do_wander = true;
+
+// Then we add a callback to be called every time a message is published on this
+// topic.
+robot_scan.subscribe(function(message) {
+  // Wander, obstacle avoidance
+  if (do_wander) {
+    var cmd = wander(message.ranges);
+    send_twist(cmd);
+  }
+});
+
+ros.on('connection', function() {
+  // This code will only be executed after ROS has connected to the server.
+  logdebug("connected");
+  // Start image display
+  updateImage();
+});
+
+ros.on('close', function() {
+  // This code will be executed when the connection to ROS disconnects.
+  logdebug("closed");
+});
+
+/* https://developer.mozilla.org/en/DOM/event/UIEvent/KeyEvent#Constants */
+function handleKey(code, down) {
+  var cmd = {linear:  {x:0, y:0, z:0},
+             angular: {x:0, y:0, z:0}},
+      scale = (down == true) ? 1 : 0,
+      move = false;
+  switch (code) {
+  case 32:
+    // spacebar
+    if (!down) {
+      move = true;
+      do_wander = !do_wander;
+    }
+  case 37:
+    // left
+    move = true;
+    cmd.angular.z = 1 * scale;
+    break;
+  case 38:
+    // up
+    move = true;
+    cmd.linear.x = .5 * scale;
+    break;
+  case 39:
+    // right
+    move = true;
+    cmd.angular.z = -1 * scale;
+    break;
+  case 40:
+    // down
+    move = true;
+    cmd.linear.x = -.5 * scale;
+    break;
+  }
+  if (move) {
+    send_twist(cmd);
+  }
+}
+document.addEventListener('keydown', function (evt) {
+  handleKey(evt.keyCode, true);
+}, true);
+document.addEventListener('keyup', function (evt) {
+  handleKey(evt.keyCode, false);
+}, true);
+
+})(); // [end onload]
+</script>
+</head>
+
+<body>
+  <section>
+    <h1>wander rosjs</h1>
+    <em>hit [escape] to close the connection</em>
+
+    <h2>legend</h2>
+    <p>[spacebar] to stop/restart wandering,<br/>
+    arrows ← ↑ → ↓ to move</p>
+
+    <h2>image</h2>
+    <img id="image"/>
+
+    <h2>debug</h2>
+    <pre><div id="debug"></div></pre>
+
+    <p>made with <a href="http://ros.org/wiki/rosjs">rosjs</a></p>
+    <p><a href="http://ros.org/wiki/mjpeg_server">mjpeg_server</a> used for image bridge is part of <a href="http://ros.org/wiki/remote_lab">remote_lab</a></p>
+  </section>
+</body>
+</hmtl>
